@@ -2,14 +2,14 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 
 // Create connection for SQL database
-var connection = mysql.createConnection
-    ({
-        host: "localhost",
-        port: 8889,
-        user: "root",
-        password: "root",
-        database: "bamazon"
-    })
+var connection = mysql.createConnection({
+    host: "localhost",
+    port: 3306,
+    user: "root",
+    password: "root",
+    database: "bamazon",
+    socketPath: "/Applications/MAMP/tmp/mysql/mysql.sock"
+});
 
 // Connect to MYSQL server and SQL Databse
 connection.connect(function (error) {
@@ -24,14 +24,14 @@ connection.connect(function (error) {
 // Include ids, names, and prices of products for sale.
 var displayProducts = function () {
 
-    console.log("Below are the list of products available for sale: \n");
-    console.log("---------------------------------------------------------------------------");
+    console.log("List of products available for sale: \n");
+    console.log("========================================");
 
     connection.query("SELECT * FROM products", function (error, response) {
         for (var i = 0; i < response.length; i++) {
             console.log("Item #: " + response[i].item_id + " || Product: " + response[i].product_name + " || Price: $" + response[i].price + "\n");
         }
-        console.log("---------------------------------------------------------------------------");
+        console.log("=================================================");
 
         promptCustomer(response);
     })
@@ -45,7 +45,7 @@ var promptCustomer = function (response) {
         ([{
             type: "input",
             name: "selection",
-            message: "What is the item number of the product you would like to buy? [If you want to quit, press 'Q']"
+            message: "Number ID of the product you want? [If you want to quit, press 'Q']"
     }]).then(function (answer) {
         var correct = false;
         if (answer.selection.toUpperCase() == "Q") {
@@ -66,7 +66,7 @@ var promptCustomer = function (response) {
             ({
             type: "input",
             name: "quantity",
-            message: "How many units of the product would you like to buy?",
+            message: "How many units of the product do you need?",
 
             validate: function (value) {
             if (isNaN(value) == false) {
@@ -89,7 +89,7 @@ var promptCustomer = function (response) {
                                 // If not, log message `Insufficient quantity!`, and prevent the order from going through.
             }
              else {
-                console.log("Try again. Insufficient quantity!");
+                console.log("Insufficient quantity!");
                 promptCustomer(response);
                 }
             });
@@ -108,11 +108,11 @@ var promptCustomer = function (response) {
 // If my store does have enough product, fulfill customer's order(s)
 function displayOrder(quantity, name, price) {
     orderTotal = quantity * price;
-    console.log("Thanks for your order! Please see details of your order below: \n");
+    console.log("Thanks for your order! Details below: \n");
 
     // Once update goes through, show the customer the total cost of their purchase
-    console.log("Total cost of purchase: $" + orderTotal);
-    console.log("---------------------------------------------------------------------------");
+    console.log("Total purchase cost: $" + orderTotal);
+    console.log("=========================================================");
 
     // End the program
     process.exit();
